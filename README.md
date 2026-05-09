@@ -1,2 +1,60 @@
 # Will-a-student-pass-or-fail-depending-on-their-study-habits
 Utilises supervised machine learning: 
+
+
+from sklearn.linear_model import LinearRegression
+import pandas as pd 
+from sklearn.linear_model import LogisticRegression
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn import metrics 
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
+data = pd.DataFrame({
+
+  'Study_Hours': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+
+  'Quiz_Score': [55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
+
+  'Pass/Fail': ['Fail', 'Fail', 'Pass', 'Pass', 'Pass', 'Pass', 'Pass', 'Pass', 'Pass', 'Pass']})
+
+#print(data)
+
+label_encoder = LabelEncoder()
+data['Pass/Fail'] = label_encoder.fit_transform(data['Pass/Fail'])
+
+#print(data.isnull().sum())
+
+#heatmap = sns.heatmap(data.corr(), annot=True)
+#plt.show()
+
+scatter_plot = sns.scatterplot(data=data,x='Study_Hours', y="Quiz_Score",hue="Pass/Fail")
+plt.title = "Study Hours vs Quiz Scores"
+plt.xlabel = "Study Hours"
+plt.ylabel = "Quiz Scores"
+plt.show()
+
+mean_score = data['Quiz_Score'].mean()
+median_score = data['Quiz_Score'].median()
+mode_score = data['Quiz_Score'].mode()
+
+X = data[['Study_Hours']]
+y_linear = data['Quiz_Score']
+
+lin_model = LinearRegression()
+lin_model.fit(X, y_linear)
+data['Predicted_Score'] = lin_model.predict(X)
+r2 = r2_score(y_linear, data['Predicted_Score'])
+
+y_log = data['Pass/Fail_Enc']
+log_model = LogisticRegression()
+log_model.fit(X, y_log)
+data['Pass_Probability'] = log_model.predict_proba(X)[:, 1]
+data['Predicted_Pass'] = log_model.predict(X)
+acc = accuracy_score(y_log, data['Predicted_Pass'])
+
+plt.figure(figsize=(10, 5))
+sns.regplot(x='Study_Hours', y='Pass/Fail_Enc', data=data, logistic=True, ci=None, line_kws={'color': 'red'})
+plt.title("Logistic Regression: Probability of Passing vs Study Hours")
+plt.show()
